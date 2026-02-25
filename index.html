@@ -106,11 +106,14 @@ header h1 {
   border-radius: 12px;
   padding: 14px 16px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.entry-row {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  transition: transform 0.15s, box-shadow 0.15s;
-  position: relative;
 }
 
 .entry.checked {
@@ -176,25 +179,35 @@ header h1 {
 
 .entry-actions {
   display: flex;
-  gap: 4px;
-  flex-shrink: 0;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .entry-actions button {
-  width: 32px;
-  height: 32px;
-  border: none;
+  padding: 6px 14px;
+  border: 1.5px solid #d4c9bc;
   border-radius: 8px;
-  background: transparent;
+  background: #faf8f5;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  color: #6b6050;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 36px;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05);
 }
 
 .entry-actions button:active {
-  background: #f0ebe5;
+  background: #ede8e2;
+  border-color: #c4b9ac;
+}
+
+.entry-actions .delete-btn {
+  color: #c0564f;
+  border-color: #e0c4c2;
 }
 
 /* Add button */
@@ -516,15 +529,17 @@ header h1 {
         const checkedClass = entry.done ? ' checked' : '';
         const doneClass = entry.done ? ' done' : '';
         html += '<div class="entry' + checkedClass + '" data-id="' + entry.id + '">';
+        html += '<div class="entry-row">';
         html += '<div class="entry-check' + doneClass + '" data-id="' + entry.id + '"></div>';
         html += '<div class="entry-body">';
         if (entry.time) html += '<div class="entry-time">' + formatTime(entry.time) + '</div>';
         html += '<div class="entry-task">' + escapeHtml(entry.task) + '</div>';
         if (entry.note) html += '<div class="entry-note">' + escapeHtml(entry.note) + '</div>';
         html += '</div>';
+        html += '</div>';
         html += '<div class="entry-actions">';
-        html += '<button data-action="edit" data-id="' + entry.id + '">âï¸</button>';
-        html += '<button data-action="delete" data-id="' + entry.id + '">ðï¸</button>';
+        html += '<button data-action="edit" data-id="' + entry.id + '">Edit</button>';
+        html += '<button class="delete-btn" data-action="delete" data-id="' + entry.id + '">Delete</button>';
         html += '</div>';
         html += '</div>';
       });
