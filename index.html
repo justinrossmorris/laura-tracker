@@ -391,6 +391,42 @@ header h1 {
   color: #6b6050;
 }
 
+/* Day action buttons (Complete All / Clear Checks) */
+.day-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.day-actions button {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1.5px solid #d4c9bc;
+  border-radius: 10px;
+  background: #faf8f5;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 600;
+  color: #6b6050;
+  -webkit-tap-highlight-color: rgba(0,0,0,0.05);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.day-actions button:active {
+  background: #ede8e2;
+  border-color: #c4b9ac;
+}
+
+.day-actions .complete-all-btn {
+  color: #5a7a4a;
+  border-color: #b8caa8;
+}
+
+.day-actions .clear-checks-btn {
+  color: #9a9080;
+}
+
 /* Streak counter at bottom of day view */
 .streak-info {
   text-align: center;
@@ -524,6 +560,11 @@ header h1 {
       html += '<p>No entries yet.<br>Tap <strong>+</strong> to add your first one.</p>';
       html += '</div>';
     } else {
+      // Day action buttons
+      html += '<div class="day-actions">';
+      html += '<button class="complete-all-btn" id="completeAllBtn">Complete All</button>';
+      html += '<button class="clear-checks-btn" id="clearChecksBtn">Clear Checks</button>';
+      html += '</div>';
       html += '<div class="entry-list">';
       entries.forEach(entry => {
         const checkedClass = entry.done ? ' checked' : '';
@@ -564,6 +605,11 @@ header h1 {
     view.querySelectorAll('[data-action="delete"]').forEach(el => {
       el.addEventListener('click', () => openDelete(el.dataset.id));
     });
+    // Day action buttons
+    var completeBtn = document.getElementById('completeAllBtn');
+    if (completeBtn) completeBtn.addEventListener('click', completeAll);
+    var clearBtn = document.getElementById('clearChecksBtn');
+    if (clearBtn) clearBtn.addEventListener('click', clearChecks);
   }
 
   function escapeHtml(text) {
@@ -581,6 +627,21 @@ header h1 {
       saveData(data);
       renderDay();
     }
+  }
+
+  // --- Complete All / Clear Checks ---
+  function completeAll() {
+    const key = DAY_KEYS[currentDay];
+    (data[key] || []).forEach(e => e.done = true);
+    saveData(data);
+    renderDay();
+  }
+
+  function clearChecks() {
+    const key = DAY_KEYS[currentDay];
+    (data[key] || []).forEach(e => e.done = false);
+    saveData(data);
+    renderDay();
   }
 
   // --- Add / Edit modal ---
