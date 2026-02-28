@@ -418,7 +418,7 @@ header h1 {
   border-color: #c4b9ac;
 }
 
-.day-actions .complete-all-btn {
+.day-actions .complete-day-btn {
   color: #5a7a4a;
   border-color: #b8caa8;
 }
@@ -427,10 +427,28 @@ header h1 {
   color: #9a9080;
 }
 
+/* Completion count display */
+.completion-info {
+  text-align: center;
+  margin-top: 20px;
+  padding: 14px;
+  font-size: 13px;
+  color: #7c956b;
+  background: rgba(124,149,107,0.08);
+  border-radius: 10px;
+}
+
+.completion-info .count {
+  font-size: 22px;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 2px;
+}
+
 /* Streak counter at bottom of day view */
 .streak-info {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 8px;
   padding: 12px;
   font-size: 13px;
   color: #9a9080;
@@ -483,6 +501,7 @@ header h1 {
   const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
   const STORAGE_KEY = 'laura_tracker_data';
+  const COMP_KEY = 'laura_tracker_completions';
 
   let currentDay = new Date().getDay(); // 0=Sun
   let editingId = null;
@@ -505,7 +524,22 @@ header h1 {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
   }
 
+  function loadCompletions() {
+    try {
+      const raw = localStorage.getItem(COMP_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch(e) {}
+    const c = {};
+    DAY_KEYS.forEach(k => c[k] = 0);
+    return c;
+  }
+
+  function saveCompletions(c) {
+    try { localStorage.setItem(COMP_KEY, JSON.stringify(c)); } catch(e) {}
+  }
+
   let data = loadData();
+  let completions = loadCompletions();
 
   // --- Tabs ---
   function renderTabs() {
@@ -562,7 +596,7 @@ header h1 {
     } else {
       // Day action buttons
       html += '<div class="day-actions">';
-      html += '<button class="complete-all-btn" id="completeAllBtn">Complete All</button>';
+      html += '<button class="complete-day-btn" id="completeDayBtn">Complete Day</button>';
       html += '<button class="clear-checks-btn" id="clearChecksBtn">Clear Checks</button>';
       html += '</div>';
       html += '<div class="entry-list">';
@@ -586,10 +620,14 @@ header h1 {
       });
       html += '</div>';
 
-      // Completion count
+      // Completion count for today's checks
       const doneCount = entries.filter(e => e.done).length;
-      if (entries.length > 0) {
-        html += '<div class="streak-info">' + doneCount + ' of ' + entries.length + ' complete</div>';
+      html += '<div class="streak-info">' + doneCount + ' of ' + entries.length + ' complete</div>';
+
+      // Days completed counter
+      const dayComp = completions[key] || 0;
+      if (dayComp > 0) {
+        html += '<div class="completion-info"><span class="count">' + dayComp + '</span>day' + (dayComp === 1 ? '' : 's') + ' completed</div>';
       }
     }
 
@@ -606,8 +644,8 @@ header h1 {
       el.addEventListener('click', () => openDelete(el.dataset.id));
     });
     // Day action buttons
-    var completeBtn = document.getElementById('completeAllBtn');
-    if (completeBtn) completeBtn.addEventListener('click', completeAll);
+    var completeBtn = document.getElementById('completeDayBtn');
+    if (completeBtn) completeBtn.addEventListener('click', completeDay);
     var clearBtn = document.getElementById('clearChecksBtn');
     if (clearBtn) clearBtn.addEventListener('click', clearChecks);
   }
@@ -629,11 +667,11 @@ header h1 {
     }
   }
 
-  // --- Complete All / Clear Checks ---
-  function completeAll() {
+  // --- Complete Day / Clear Checks ---
+  function completeDay() {
     const key = DAY_KEYS[currentDay];
-    (data[key] || []).forEach(e => e.done = true);
-    saveData(data);
+    completions[key] = (completions[key] || 0) + 1;
+    saveCompletions(completions);
     renderDay();
   }
 
